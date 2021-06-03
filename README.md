@@ -1,4 +1,4 @@
-# CanEvolve <img align="right" width="208" height="129" src="https://github.com/tomouellette/CanEvolve.jl/blob/master/icon.svg?sanitize=true">
+# CanEvolve <img align="right" width="312" height="193" src="icon.svg">
 
 [![Build Status](https://travis-ci.com/tomouellette/CanEvolve.jl.svg?branch=master)](https://travis-ci.com/tomouellette/CanEvolve.jl)
 
