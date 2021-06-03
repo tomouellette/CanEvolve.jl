@@ -1,5 +1,3 @@
-__precompile__()
-
 module CanEvolve
 
 using StatsBase
@@ -10,6 +8,11 @@ using Random
 using Plots
 using StatsPlots
 using PyCall
+
+const np = PyNULL()
+function __init__()
+    copy!(np, pyimport_conda("numpy", "numpy"))
+end
 
 export
 

@@ -1,7 +1,6 @@
 # ---------------------------------------------------------------------------
 # automation.jl: Various functions for synthetic data generation and analysis
 # ---------------------------------------------------------------------------
-np = pyimport("numpy")
 
 # Note: manual specification of parameter ranges
 function sampleParameters()

@@ -14,8 +14,6 @@ Our framework differs from previous frameworks by:
 
 """
 
-np = pyimport("numpy")
-
 mutable struct cell
 
     neutral::Array{Int64,1}
@@ -382,11 +380,11 @@ function mutationMetrics(VAF, mut_type, fitness; f_min::Float64 = 0.1, f_max::Fl
 
 end
 
-function frequencyThresholds(depth; alt_reads::Int64 = 2)
-    f_min = (alt_reads/depth) + ( ( 2.0*sqrt(alt_reads*(1-(alt_reads/depth))) ) / depth)
-    f_max = 0.5 - ( ( 3.0*sqrt((0.5*depth)*(1-0.5)) ) / depth)
-    return f_min, f_max
-end
+#function frequencyThresholds(depth; alt_reads::Int64 = 2)
+#    f_min = (alt_reads/depth) + ( ( 2.0*sqrt(alt_reads*(1-(alt_reads/depth))) ) / depth)
+#    f_max = 0.5 - ( ( 3.0*sqrt((0.5*depth)*(1-0.5)) ) / depth)
+#    return f_min, f_max
+#end
 
 function simulation(b, d, u; Nfinal::Int64 = 10000, phi_b::Float64 = 0.0, phi_d::Float64 = 0.0, nclonal::Int64 = 100, depth::Int64 = 100, noise::String = "binomial", rho::Float64 = 0.0, lower_cutoff::Float64 = 0.1, upper_cutoff::Float64 = 0.4, ndrivers::Int64 = 20, lambda::Float64 = 0.1, fitness_model::String = "multiplicative", alt_reads::Int64 = 2)
 
