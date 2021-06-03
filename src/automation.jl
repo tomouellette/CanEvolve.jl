@@ -57,13 +57,13 @@ function plotVAF(sim_object; bins::Int64 = 100)
     VAF = sim_object[2][1]
     scaler = fit(Histogram, VAF, nbins = bins)
     scaler = normalize(scaler, mode = :pdf)
-    plot(scaler, fillcolor = "black", linecolor = "gray", linealpha = 1, legend = false, xlims = (0,1), xtickfontsize=8,ytickfontsize=8)
+    plot(scaler, fillcolor = RGB(100/255,180/255,137/255), linecolor = RGB(192/255,193/255,194/255), linealpha = 0.8, legend = false, xlims = (0,1), xtickfontsize=8,ytickfontsize=8)
     if sum(sim_object[3][1]) != 0
-        vline!(sim_object[3][1], color = "blue", alpha = 0.8, linewidth = 3)
+        vline!(sim_object[3][1], color = RGB(118/255,140/255,195/255), alpha = 1, linewidth = 3)
     end
     xlabel!("Variant allele frequency (VAF)")
     ylabel!("Density")
-    density!(VAF, linecolor = "red", linewidth = 5, linealpha = 0.8)
+    density!(VAF, linecolor = RGBA(249/255,101/255,103/255,0), linewidth = 5, linealpha = 0.95)
 end
 
 function frequencyThresholds(depth; alt_reads::Int64 = 2)
