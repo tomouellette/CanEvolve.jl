@@ -26,8 +26,8 @@ To visualize the VAF distribution for the positively selected (*p*) and neutrall
 ```julia
 plot(plotVAF(p, bins = 100), plotVAF(n, bins = 100), layout = 2)
 ```
-<img align="right" width="400" height="150" src="example.svg">
-
+<img width="400" height="150" src="example.svg">
+<br>
 #### Acknowledgements
 
 This package is an extension of the [CancerSeqSim.jl](https://github.com/marcjwilliams1/CancerSeqSim.jl) framework developed by Marc Williams. In addition, we generate neutral synthetic data using a Pareto distribution with shape and scale parameters retrieved from PCAWG fits by [Caravagna et al., 2020](https://www.nature.com/articles/s41588-020-0675-5).
