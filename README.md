@@ -21,12 +21,14 @@ We provide a fast synthetic data generator that randomly samples empirically rea
 p, n = autoSimulation(1, 0.1, nsubclone_min = 1, nsubclone_max = 2, lower_cutoff = 0.1, upper_cutoff = 0.4)
 ```
 
-To visualize the VAF distribution for the positively selected (*p*) and neutrally evolving (*n*) tumours, run *plotVAF*.
+To visualize the VAF distribution for the positively selected (*p*) and neutrally evolving (*n*) tumours, run *plotVAF*. 
 
 ```julia
 plot(plotVAF(p, bins = 100), plotVAF(n, bins = 100), layout = 2)
 ```
 <img width="800" height="300" src="example.svg">
+
+The vertical blue lines identify the subclone VAF in the *p* VAF distribution (left).
 
 #### Acknowledgements
 
