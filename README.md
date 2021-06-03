@@ -1,3 +1,3 @@
 # CanEvolve
 
-[![Build Status](https://github.com/tomouellette/CanEvolve.jl/workflows/CI/badge.svg)](https://github.com/tomouellette/CanEvolve.jl/actions)
+[![Build Status](https://travis-ci.com/tomouellette/CanEvolve.jl.svg?branch=master)](https://travis-ci.com/tomouellette/CanEvolve.jl)
