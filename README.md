@@ -4,9 +4,7 @@
 
 #### Overview
 
-This package is used to generate realistic variant allele frequency (VAF) distributions that are observed in bulk-sequenced single tumour biopsies. We use a stochastic branching process, under a multiplicative fitness framework, to grow tumour populations under positive selection. To achieve speed and scale, we utilize a small N approximation for synthetic tumour populations that still fully recapitulates the observed VAFs in patient tumours. We note that because we use small N in our stochastic simulations, neutrally evolving synthetic tumours have a higher probability of observing spurious subclones due to stronger genetic drift. To avoid the generation of spurious subclones, we implement a generative synthetic data step for neutral tumours by sampling VAF distributions from Pareto distributions parametrized by empirically relevant shape and scape values. 
-
-We also integrate feature engineering functions to convert the VAF distribution into deep learning friendly data structures for evolutionary inference. For deep learning applications using this synthetic data, please see *ADD GITHUB REPO HERE*
+This package is used to generate realistic variant allele frequency (VAF) distributions that are observed in bulk-sequenced single tumour biopsies. We use completely stochastic simulations to generate tumour poulations with subclones/driver haplotypes under positive selection. In addition, to avoid spurious subclones from genetic drift in computationally feasible population sizes, we use a fully synthetic generative process to create neutral VAF distributions based on sampling from a Pareto distribution. We also integrate feature engineering functions to convert the VAF distribution into deep learning friendly data structures for evolutionary inference. For deep learning applications using this synthetic data, please see *ADD GITHUB REPO HERE*
 
 
 #### Acknowledgements
