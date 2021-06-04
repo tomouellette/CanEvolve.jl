@@ -1,4 +1,4 @@
-# CanEvolve <img align="right" width="208" height="129" src="icon.svg">
+# CanEvolve <img align="right" width="208" height="129" src="img/icon.svg">
 
 [![Build Status](https://travis-ci.com/tomouellette/CanEvolve.jl.svg?branch=master)](https://travis-ci.com/tomouellette/CanEvolve.jl)
 
@@ -29,7 +29,7 @@ To visualize the VAF distribution for the positively selected (*p*) and neutrall
 using Plots
 plot(plotVAF(p, bins = 100), plotVAF(n, bins = 100), layout = 2)
 ```
-<img width="800" height="300" src="example.svg">
+<img width="800" height="300" src="img/example.svg">
 
 The vertical blue lines identify the subclone VAF in the *p* VAF distribution (left).
 
