@@ -16,29 +16,32 @@ end
 
 export
 
-	# simulation.jl
-	cell,
-	mutate,
-	primeSim,
-	evolveTumour,
+    # simulation.jl
+    cell,
+    mutate,
+    primeSim,
+    evolveTumour,
     BetaBin,
-	sequence,
-	detectableDrivers,
-	processTumour,
-	adjustProportion,
-	mutationMetrics,
+    sequence,
+    detectableDrivers,
+    processTumour,
+    adjustProportion,
+    mutationMetrics,
     simulation,
     full_synthetic_neutral,
 
     # automation.jl
     sampleParameters,
     autoSimulation,
+    autoSimulation_fixed,
+    autoSimulation_fixed_depth,
     plotVAF,
     frequencyThresholds,
     mapfrequency,
     uniformdensity,
     rescale,
-    engineer
+    engineer,
+    engineer_un
 
 include("simulation.jl")
 include("automation.jl")
