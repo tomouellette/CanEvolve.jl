@@ -1,19 +1,22 @@
-# --------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # simulation.jl: Tumour evolution under a stochastic branching process
-# --------------------------------------------------------------------
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 """
-
-This simulation framework is based off of CancerSeqSim.jl by Marc Williams (Williams et al. 2018), as well as ideas from the rkMC in Waclaw et al. 2015.
+This simulation framework is adapted/extended from CancerSeqSim.jl by Marc Williams (Williams et al. 2018), as well as ideas from the rkMC in Waclaw et al. 2015.
 
 Our framework differs from previous frameworks by:
-    (i) Allowing for stochastic arrival of driver, and/or passenger, mutations that scale growth rates (b - d)
-    (i) Integrating a multiplicative or additive fitness model that enables an arbitrary number of unique driver haplotypes to arise (similar to McFarland et al. 2014)
-    (iii) Allow for deleterious passenger mutations that decrease fitness if interested
-    (iv) At small N, we use a fully synthetic generation of neutral evolution data as genetic drift can lead to excess spurious subclones that lead to a biased "ground truth" dataset for ML inferences
-
+   (i) Allowing for stochastic arrival of driver, and/or passenger, mutations that scale growth rates (b - d)
+   (i) Integrating a multiplicative or additive fitness model that enables an arbitrary number of unique driver haplotypes to arise (similar to McFarland et al. 2014)
+   (iii) Allow for deleterious passenger mutations that decrease fitness if interested
+   (iv) At small N, we use a fully synthetic generation of neutral evolution data as genetic drift can lead to excess spurious subclones that lead to a biased "ground truth" dataset for ML inferences
 """
 
+# =========================================================================================================================================================================================================
+
+"""
+A class to store each cell's mutation and evolutionary information.
+"""
 mutable struct cell
 
     neutral::Array{Int64,1}
@@ -25,6 +28,28 @@ mutable struct cell
 
 end
 
+"""
+Takes in a cell and adds mutations.
+
+Input:
+    - struct: An object of struct cell
+    - integer: Mutation rate (per genome per division)
+    - float: Probability of subclone/driver event (per division probability)
+    - float: Probability of deleterious mutation (per division probability)
+    - integer: A mutation id to enable counting post-simulation
+    - ndrivers: The current number of subclone/driver events remaining in the simulation
+    - lambda (float): Mean of exponential selection coefficient distribution (default = 0.1)
+    - fitness_model (string): Increase fitness under an "additive" or "multiplicative" model (default = "multiplicative")
+
+Returns:
+    - struct: An updated object of struct cell
+    - integer: An updated mutation id that increased by the number of new mutations generated
+    - float: The fitness scaled birth rate of the cell, > 1 if a new driver event occured else 1
+    - float: The fitness scaled death rate of the cell, < 1 if a new deleterious passenger occured else 1
+    - float: The selection coefficients of the new mutations
+    - integer: Number of driver subclone/driver events remaining in the simulation
+
+"""
 function mutate(cell, µ, phi_b, phi_d, mut_id, ndrivers, lambda = 0.1, fitness_model = "multiplicative")
 
     neutral = rand(Poisson(µ * (1 - phi_b - phi_d)))
@@ -71,6 +96,9 @@ function mutate(cell, µ, phi_b, phi_d, mut_id, ndrivers, lambda = 0.1, fitness_
 
 end
 
+"""
+Primes the simulation with values and arrays for tracking events.
+"""
 function primeSim(;nclonal::Int64 = 1)
 
     # One cell at time 0
@@ -98,6 +126,9 @@ function primeSim(;nclonal::Int64 = 1)
 
 end
 
+"""
+See autoSimulation documentation in automation.jl for description of parameters.
+"""
 function evolveTumour(b, d, µ; Nfinal::Int64 = 10000, phi_b::Float64 = 0.01, phi_d::Float64 = 0.5, nclonal::Int64 = 0, ndrivers::Int64 = 50, lambda::Float64 = 0.1, fitness_model::String = "multiplicative")
 
     bd_max = b + d
@@ -181,6 +212,9 @@ function evolveTumour(b, d, µ; Nfinal::Int64 = 10000, phi_b::Float64 = 0.01, ph
 
 end
 
+"""
+Beta binomial distribution (reference: CancerSeqSim.jl by Marc Williams)
+"""
 function BetaBin(n, p, rho)
     # Note: P(X = k) = {n \\choose k} B(k + \\alpha, n - k + \\beta) / B(\\alpha, \\beta),  \\quad \\text{ for } k = 0,1,2, \\ldots, n.
     mu = p * n
@@ -189,11 +223,31 @@ function BetaBin(n, p, rho)
     return rand(Binomial(n, rand(Beta(alpha, beta))))
 end
 
-function sequence(depth, N, VAF, fitness, mut_type; limit_of_detection::Float64 = 0.1, noise::String = "binomial", rho::Float64 = 0.0025, alt_reads::Int64 = 2)
+"""
+Virtually sequences a tumour where depth is binomially distributed and reads are binomial or beta-binomially distributed.
+
+Input:
+    - integer: Mean sequencing depth specified for simulation
+    - integer: Final population size of simulated tumour
+    - array: VAF for each mutation
+    - array: Fitness/selection coefficient of each mutation
+    - array: Functional type for each mutation e.g. "N", "NS", "S" for neutral, nonsynonymous, or synonymous (##Note: not generally used in this framework)
+    - limit_of_detection (float): The lower VAF bound detectable prior to adding sequencing noise.
+    - noise (string): Sequencing noise model either "binomial" or "betabinomial" (default = "betabinomial")
+    - rho (float): Overdispersion parameter for betabinomial distribution
+    - alt_reads (integer): Minimum number of alternate reads to call a mutation during virtual sequencing
+
+Returns:
+    - array: VAF for each mutation injected with sequencing noise
+    - array: Reads for each mutation
+    - array: Sequencing depth for each mutation
+    - array: Fitness of each mutation where mutations that were lost during virtual sequencing are removed
+    - array: Functional type for each mutation where mutations that were lost during virtual sequencing are removed
+"""
+function sequence(depth, N, VAF, fitness, mut_type; limit_of_detection::Float64 = 0.1, noise::String = "betabinomial", rho::Float64 = 0.0025, alt_reads::Int64 = 2)
 
     # Binomially distributed depth with binomially distributed reads
-    VAF = VAF ./ 2
-    #VAF = VAF[VAF .> (alt_reads / depth)]
+    VAF = VAF ./ 2 # Takes cell fractions and converts to frequency
     VAF, fitness, mut_type = VAF[VAF .> limit_of_detection], fitness[VAF .> limit_of_detection], mut_type[VAF .> limit_of_detection]
     dp = rand.(Binomial.(N, repeat(depth:depth, length(VAF)) ./ N))
     if (noise == "binomial") | (rho == 0.0)
@@ -208,11 +262,35 @@ function sequence(depth, N, VAF, fitness, mut_type; limit_of_detection::Float64 
 
     # Remove mutations below hard alternate read cutoff
     remove_zeros = findall(vafadjust .> (alt_reads / depth))
-    #remove_zeros = findall(vafadjust .> limit_of_detection)
 
     return vafadjust[remove_zeros], reads[remove_zeros], dp[remove_zeros], fitness[remove_zeros], mut_type[remove_zeros]
 end
 
+"""
+Parses information on detectable subclones/drivers.
+
+Input:
+    - array: Cells generated during virtual tumour growth and evolution
+    - array: VAF for each mutation
+    - array: Mutation ids that one-to-one map with VAF, mutation time, and mutation fitness information
+    - integer: Final tumour population size
+    - array: Time of emergence for each mutation
+    - array: Fitness/selection coefficient of each mutation
+    - lower_cutoff (float): Lower frequency (range 0 - 0.5) bound for detecting subclones (default = 0.09)
+    - upper_cutoff (float): Upper frequency (range 0 - 0.5) bound for detecting subclones (default = 0.41)
+
+Returns:
+    - array: Subclone/haplotype ids for each detectable haplotype where an id is of the form [integer, integer, ...] where each integer represents the mutation id
+    - array: Frequency of each haplotype (cellular fraction / 2)
+    - array: Emergence times for each haplotype based on age of the most recent mutation in the haplotype
+    - array: Multiplicative fitness of the haplotype
+    - array: Fitness of the haplotype divided by the average population fitness
+    - float: Average population fitness
+    - float: Fitness of all cells that are not subclonal/driver haplotypes
+    - array: Cellular fraction/proportions of each subclone/haplotype
+    - integer: Number of detectable subclones i.e. subclone in (lower_cutoff, upper_cutoff)
+    - integer: Number of undetectable subclones i.e. subclone in (0, lower_cutoff)U(upper_cutoff, 0.5)
+"""
 function detectableDrivers(track_cells, VAF, mut_ids, N, track_mut_time, fitness; lower_cutoff::Float64 = 0.1, upper_cutoff::Float64 = 0.4)
 
     if length(findall(fitness .> 0)) > 0
@@ -306,6 +384,9 @@ function detectableDrivers(track_cells, VAF, mut_ids, N, track_mut_time, fitness
 
 end
 
+"""
+Get mutation information for each simulated tumour population.
+"""
 function processTumour(N, track_N, t, track_t, track_mut_time, track_cells, track_fitness, mut_id)
 
     # Get counts for each mutation in tumour population
@@ -337,6 +418,9 @@ function processTumour(N, track_N, t, track_t, track_mut_time, track_cells, trac
 
 end
 
+"""
+Adjust the subclone proportions (true cellular fractions) to account for nesting in the >1 subclone case
+"""
 function adjustProportion(dhap_freq, dhap_ids, mfitness; threshold::Float64 = 0.05)
 
     # Adjust haplotype frequencies to true cellular proportions (relevant if there are nested subclones)
@@ -380,13 +464,10 @@ function mutationMetrics(VAF, mut_type, fitness; f_min::Float64 = 0.1, f_max::Fl
 
 end
 
-#function frequencyThresholds(depth; alt_reads::Int64 = 2)
-#    f_min = (alt_reads/depth) + ( ( 2.0*sqrt(alt_reads*(1-(alt_reads/depth))) ) / depth)
-#    f_max = 0.5 - ( ( 3.0*sqrt((0.5*depth)*(1-0.5)) ) / depth)
-#    return f_min, f_max
-#end
-
-function simulation(b, d, u; Nfinal::Int64 = 10000, phi_b::Float64 = 0.0, phi_d::Float64 = 0.0, nclonal::Int64 = 100, depth::Int64 = 100, noise::String = "binomial", rho::Float64 = 0.0, lower_cutoff::Float64 = 0.1, upper_cutoff::Float64 = 0.4, ndrivers::Int64 = 20, lambda::Float64 = 0.1, fitness_model::String = "multiplicative", alt_reads::Int64 = 2)
+"""
+See autoSimulation documentation in automation.jl for description of parameters.
+"""
+function simulation(b, d, u; Nfinal::Int64 = 10000, phi_b::Float64 = 0.0, phi_d::Float64 = 0.0, nclonal::Int64 = 100, depth::Int64 = 100, noise::String = "betabinomial", rho::Float64 = 0.0, lower_cutoff::Float64 = 0.1, upper_cutoff::Float64 = 0.4, ndrivers::Int64 = 20, lambda::Float64 = 0.1, fitness_model::String = "multiplicative", alt_reads::Int64 = 2)
 
     f_min, f_max = frequencyThresholds(depth, alt_reads = alt_reads)
 
@@ -420,13 +501,32 @@ function simulation(b, d, u; Nfinal::Int64 = 10000, phi_b::Float64 = 0.0, phi_d:
     return n_detectable, [VAF, reads, DP], [haplotype_frequency, cellular_proportion, haplotype_times, absolute_fitness, relative_fitness], [beneficial, deleterious, neutral, total, subclonal], parameters
 end
 
-function full_synthetic_neutral(;depth::Int64 = 100, Nfinal::Int64 = 1000, nclonal::Int64 = 500, match_pos_muts = 0, noise::String = "betabinomial", rho::Float64 = 0.002, alt_reads::Int64 = 2)
+"""
+Generates neutral evolution synthetic VAF data by sampling from Pareto distributions with empirically realistic shape and and scale parameters.
 
-    """ The Pareto distribution that defines the neutral VAF tail is parameterized by shape and scale
+Notes:
+    - The Pareto distribution that defines the neutral VAF tail is parameterized by shape and scale
     - Caravagna et al. 2020 fit neutral tails, i.e. a Pareto distribution, to many PCAWG samples.
     - To generate realistic shape and scale values during synthetic neutral data generaton,
       we built sampling distributions for the shape and scale parameters by performing MLE fits
-      to all PCAWG samples above 50x coverage.
+      to all PCAWG samples above 50x coverage. (Although default scale parameter used here is f_min)
+
+Input:
+    - depth (integer): Mean sequencing depth (default = 100)
+    - Nfinal (integer): Final tumour population size (default = 1000)
+    - nclonal (integer): Number of clonal mutations  (default = 500)
+    - match_pos_muts (integer): If pairing with a positive selection simulation, specifies number of non-clonal mutations to add (Default = 0; randomly sample mutation counts)
+    - noise (string): Sequencing noise model either "binomial" or "betabinomial" (default = "betabinomial")
+    - rho (float): Overdispersion parameter for betabinomial distribution
+    - alt_reads (integer): Minimum number of alternate reads to call a mutation during virtual sequencing
+    - trim_tail (integer): Specifies if tail of distribution should be randomly trimmed at 0.1 - 0.3 VAF. No trim if 0 or 1 to trim (default = 0)
+
+Returns:
+    - CanEvolve simulation object: A neutral evolution simulation object. See autoSimulation description in automation.jl  for more information
+"""
+function full_synthetic_neutral(;depth::Int64 = 100, Nfinal::Int64 = 1000, nclonal::Int64 = 500, match_pos_muts = 0, noise::String = "betabinomial", rho::Float64 = 0.002, alt_reads::Int64 = 2, trim_tail::Int64 = 0)
+
+    """
     """
     # Fit of Caravagna et al 2020 shape parameters with gamma + E distribution: shape 4.016782, rate 6.404820
     shape = rand(Gamma(4.016782, 1/6.404820), 1)[1] + 0.6150006 # Scale = 1/rate
@@ -442,16 +542,19 @@ function full_synthetic_neutral(;depth::Int64 = 100, Nfinal::Int64 = 1000, nclon
     end
 
     # Generate neutral tail VAFs
-    #vaf_nonclonal = rand(Pareto(shape, scale), nmuts)
     f_min, f_max = frequencyThresholds(depth, alt_reads = alt_reads)
     vaf_nonclonal = rand(Pareto(shape, f_min), nmuts)
     vaf_nonclonal = vaf_nonclonal[findall(vaf_nonclonal .< 1)]
-    vaf_clonal = [1 for i in 1:nclonal]
+    vaf_clonal = [0.5 for i in 1:nclonal]
     vafs = np.hstack([vaf_nonclonal, vaf_clonal])
 
     # Synthetic sequencing
-    vafs = vafs ./ 2
-    vafs = vafs[vafs .> f_min]
+    if trim_tail == 1
+        f_min = rand(Uniform(0.1, 0.3), 1)[1]
+        vafs = vafs[vafs .> f_min]
+    else
+        vafs = vafs[vafs .> f_min]
+    end
     dp = rand.(Binomial.(Nfinal, repeat(depth:depth, length(vafs)) ./ Nfinal))
     if (noise == "binomial") | (rho == 0.0)
         reads = rand.(Binomial.(dp, vafs))
