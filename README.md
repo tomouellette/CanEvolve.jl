@@ -35,6 +35,16 @@ The vertical blue lines identify the subclone VAF in the *p* VAF distribution (l
 
 ### Feature engineering for deep learning
 
+If you would like to convert synthetic VAF distributions into a usable input for inference, just run *engineer*.
+
+```julia
+# Segment the VAF distribution into 64 and 128 bins that are normalized by maximum value
+features, labels = engineer(p, k = [64, 128]
+
+# Segment the VAF distribution into 64 and 128 bins that are non-normalized counts
+features, labels = engineer_un(p, k = [64, 128]
+```
+
 <hr>
 
 #### Acknowledgements
