@@ -242,7 +242,7 @@ function engineer_un(sim_object; lower_cutoff::Float64 = 0.09, upper_cutoff::Flo
         detectable = intersect(findall(2*upper_cutoff .> sim_object[3][2] .> 2*lower_cutoff), findall(upper_cutoff .> sim_object[3][1] .> lower_cutoff))
         labels = [1, length(sim_object[3][1][detectable]), sim_object[3][1][detectable], sim_object[3][3][detectable], sim_object[3][4][detectable], sim_object[3][5][detectable], sim_object[5][3], depth, sim_object[5][10]]
     elseif mode == 0
-        labels = [0, 0, 0, 0, 0, 0, 0, depth, sim_object[5][10]]
+        labels = [0, 0, 0, 0, 0, 0, sim_object[5][3], depth, sim_object[5][10]]
     else
         println("Did not identify proper mode.")
     end
