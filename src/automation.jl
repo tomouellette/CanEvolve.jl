@@ -112,7 +112,7 @@ function plotVAF(sim_object; bins::Int64 = 100)
     VAF = sim_object[2][1]
     scaler = fit(Histogram, VAF, nbins = bins)
     scaler = normalize(scaler, mode = :pdf)
-    plot(scaler, fillcolor = RGB(100/255,180/255,137/255), linecolor = RGB(192/255,193/255,194/255), linealpha = 0.8, legend = false, xlims = (0,1), xtickfontsize=8,ytickfontsize=8)
+    plot(scaler, fillcolor = "#008EA0", linecolor = "#008EA0", linealpha = 0.5, legend = false, xlims = (0,1), ytickfont = font(8, "Helvetica"), xtickfont = font(8, "Helvetica"), xtickfontsize=8,ytickfontsize=8)
     if sum(sim_object[3][1]) != 0
         vline!(sim_object[3][1], color = RGB(118/255,140/255,195/255), alpha = 1, linewidth = 3)
     end
@@ -202,7 +202,7 @@ function engineer(sim_object; lower_cutoff::Float64 = 0.09, upper_cutoff::Float6
         detectable = intersect(findall(2*upper_cutoff .> sim_object[3][2] .> 2*lower_cutoff), findall(upper_cutoff .> sim_object[3][1] .> lower_cutoff))
         labels = [1, length(sim_object[3][1][detectable]), sim_object[3][1][detectable], sim_object[3][2][detectable], sim_object[3][4][detectable], sim_object[3][5][detectable], sim_object[5][3], depth, sim_object[5][10]]
     elseif mode == 0
-        labels = [0, 0, 0, 0, 0, 0, 0, depth, sim_object[5][10]]
+        labels = [0, 0, 0, 0, 0, 0, sim_object[5][3], depth, sim_object[5][10]]
     else
         println("Did not identify proper mode.")
     end

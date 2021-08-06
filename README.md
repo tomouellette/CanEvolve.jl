@@ -29,9 +29,9 @@ To visualize the VAF distribution for the positively selected (*p*) and neutrall
 using Plots
 plot(plotVAF(p, bins = 100), plotVAF(n, bins = 100), layout = 2)
 ```
-<img width="800" height="300" src="img/example.svg">
+<img width="800" height="300" src="img/autosimulation.gif">
 
-The vertical blue lines identify the subclone VAF in the *p* VAF distribution (left).
+A sample of 20 auto simulations. The vertical orange lines identify the subclone VAF in the *p* VAF distribution (left).
 
 ### Feature engineering for deep learning
 
