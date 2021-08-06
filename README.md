@@ -17,10 +17,10 @@ Pkg.add("CanEvolve")
 
 ### Generating VAF distributions from synthetic tumours
 
-We provide a fast synthetic data generator that randomly samples empirically realistic simulation parameters from pre-specified distributions (see *sampleParameters* function in */src/automation*). The *autoSimulation*  function will generate synthetic data of a tumour under positive selection with a corresponding parameter matched neutral synthetic tumour. The example below simulates tumours at a birth rate = 1 and death rate = 0.1, and ensures the tumour subject to positive selection has at least 1 or 2 subclones between 10 - 40% VAF (20 - 80% cellular fraction).
+We provide a fast synthetic data generator that randomly samples empirically realistic simulation parameters from pre-specified distributions (see *sampleParameters* function in */src/automation*). The *autoSimulation*  function will generate synthetic data of a tumour under positive selection with a corresponding parameter matched neutral synthetic tumour. The example below simulates tumours at a birth rate = 1 and death rate = 0.1, and ensures the tumour subject to positive selection has at least 1 or 2 subclones between 10 - 40% VAF (20 - 80% cellular fraction). Note that additional subclones up to *ndrivers* can be at frequencies above or below the cutoffs.
 
 ```julia
-p, n = autoSimulation(1, 0.1, nsubclone_min = 1, nsubclone_max = 2, lower_cutoff = 0.1, upper_cutoff = 0.4)
+p, n = autoSimulation(1, 0.1, nsubclone_min = 1, nsubclone_max = 2, ndrivers = 3, lower_cutoff = 0.1, upper_cutoff = 0.4)
 ```
 
 To visualize the VAF distribution for the positively selected (*p*) and neutrally evolving (*n*) tumours, run *plotVAF*. 
@@ -31,7 +31,7 @@ plot(plotVAF(p, bins = 100), plotVAF(n, bins = 100), layout = 2)
 ```
 <img width="800" height="300" src="img/autosimulation.gif">
 
-A sample of 20 auto simulations. The vertical orange lines identify the subclone VAF in the *p* VAF distribution (left).
+A sample of 20 auto simulations. The vertical orange lines identify the subclone(s) VAF in the *p* VAF distribution (left).
 
 ### Feature engineering for deep learning
 
