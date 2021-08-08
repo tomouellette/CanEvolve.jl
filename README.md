@@ -31,7 +31,7 @@ plot(plotVAF(p, bins = 100), plotVAF(n, bins = 100), layout = 2)
 ```
 <img width="800" height="300" src="img/autosimulation.gif">
 
-A sample of 20 auto simulations. The vertical orange lines identify the subclone(s) VAF in the *p* VAF distribution (left).
+A sample of 20 auto simulations at 120x sequencing depth. The vertical orange lines identify the subclone(s) VAF in the *p* VAF distribution (left).
 
 ### Feature engineering for deep learning
 
