@@ -188,7 +188,7 @@ function evolveTumour(b, d, µ; Nfinal::Int64 = 10000, phi_b::Float64 = 0.01, ph
                 push!(track_N, N)
                 push!(track_t, t)
 
-                #Δt = - 1/(bd_max * (N+1)) * log(rand())
+                # Δt = - 1/(bd_max * (N+1)) * log(rand()) -- if you want dt to be shrunk as fitness increases, otherwise arbitrary timing based on pop size at time of subclone emergence
                 Δt = 1/(N+1)
                 t = t + Δt
             end
@@ -545,7 +545,10 @@ function full_synthetic_neutral(;depth::Int64 = 100, Nfinal::Int64 = 1000, nclon
     f_min, f_max = frequencyThresholds(depth, alt_reads = alt_reads)
     vaf_nonclonal = rand(Pareto(shape, f_min), nmuts)
     vaf_nonclonal = vaf_nonclonal[findall(vaf_nonclonal .< 1)]
-    vaf_clonal = [0.5 for i in 1:nclonal]
+
+    # Add clonal cluster between 0.45 and 0.5 VAF
+    heterozygote_cluster = rand(Uniform(0.45, 0.5), 1)[1]
+    vaf_clonal = [heterozygote_cluster for i in 1:nclonal]
     vafs = np.hstack([vaf_nonclonal, vaf_clonal])
 
     # Synthetic sequencing

@@ -19,9 +19,9 @@ Returns:
 """
 function sampleParameters()
     u = rand(DiscreteUniform(1, 500), 1)[1]
-    rho = rand(Uniform(0.0, 0.002), 1)[1]
+    rho = 10^-rand(Uniform(2, 3), 1)[1]
     phi_b = rand(Uniform(0.001, 0.1), 1)[1] / u # Normalize by u so time of driver occurences are similar across different mutation rates
-    nclonal = rand(DiscreteUniform(0, u*20), 1)[1]
+    nclonal = rand(DiscreteUniform(0, 5000), 1)[1]
     ndrivers = rand(DiscreteUniform(1, 3), 1)[1]
     lambda = rand(Uniform(1, 3), 1)[1]
     depth = rand(DiscreteUniform(50, 250), 1)[1]
@@ -56,7 +56,7 @@ Returns:
         - array: Mutation count information
         - array: Simulation parameters
 """
-function autoSimulation(b, d; Nfinal::Int64 = 1000, noise::String = "betabinomial", lower_cutoff::Float64 = 0.09, upper_cutoff::Float64 = 0.41, nsubclone_min::Int64 = 1, nsubclone_max::Int64 = 2, alt_reads::Int64 = 2)
+function autoSimulation(b, d; Nfinal::Int64 = 1000, noise::String = "betabinomial", lower_cutoff::Float64 = 0.1, upper_cutoff::Float64 = 0.4, nsubclone_min::Int64 = 1, nsubclone_max::Int64 = 2, alt_reads::Int64 = 2, trim = true)
 
     # Run positive selection simulation
     u, phi_b, nclonal, ndrivers, lambda, depth, rho = sampleParameters()
@@ -87,9 +87,14 @@ function autoSimulation(b, d; Nfinal::Int64 = 1000, noise::String = "betabinomia
     println("------------------------------")
     println("")
 
-    scale_pos, scale_clonal = rand(Uniform(1, 1.5)), rand(Uniform(0.5, 1.5)) # Add variability to clonal and subclonal mutation counts in neutral synthetic tumours
-    trim_tail = ifelse(rand(Uniform(0, 1), 1)[1] < 0.05, 1, 0) # Randomly remove tail from neutral distributions to inject more sparsity in neutral samples
+    scale_pos, scale_clonal = rand(Uniform(0.8, 1.2)), rand(Uniform(0.8, 1.2)) # Add variability to clonal and subclonal mutation counts in neutral synthetic tumours
+    if trim == true
+        trim_tail = ifelse(rand(Uniform(0, 1), 1)[1] < 0.05, 1, 0) # Randomly remove tail from neutral distributions to inject more sparsity in neutral samples
+    else
+        trim_tail = 0
+    end
     n_detectable, neutral_VAF, neutral_haplotypes, neutral_mutations, neutral_parameters = full_synthetic_neutral(depth = depth, Nfinal = Nfinal, nclonal = Int(round(nclonal * scale_clonal)), match_pos_muts = Int(round(positive_mutations[5] * scale_pos)), noise = noise, rho = rho, alt_reads = alt_reads, trim_tail = trim_tail)
+    neutral_parameters[3] = u
 
     println("Saving synthetic data...")
     simid = randstring(10)
@@ -133,7 +138,8 @@ Returns:
     - float: The upper frequency cutoff that is fixed at 3 binomial standard deviations from 0.5. ## Note, this is generally not used in this framework
 """
 function frequencyThresholds(depth; alt_reads::Int64 = 2)
-    tail_shift = rand(Uniform(1, 3), 1)[1]
+    alt_reads = rand(Uniform(2, 4), 1)[1]
+    tail_shift = rand(Uniform(1, 4), 1)[1]
     f_min = (alt_reads/depth) + ( ( tail_shift*sqrt(alt_reads*(1-(alt_reads/depth))) ) / depth)
     f_max = 0.5 - ( ( 3.0*sqrt((0.5*depth)*(1-0.5)) ) / depth)
     return f_min, f_max
