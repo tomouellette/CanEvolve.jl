@@ -51,7 +51,7 @@ Here is a sample of 20 auto simulations at 120x sequencing depth (see */img/gif_
 
 ## Feature engineering for deep learning
 
-If you would like to convert synthetic VAF distributions into a usable input for inference, just run *engineer*.
+If you would like to convert synthetic VAF distributions into a usable input for inference, just run *engineer* on autoSimulation output *p*.
 
 ```julia
 # Segment the VAF distribution into 64 and 128 bins that are normalized by maximum value
