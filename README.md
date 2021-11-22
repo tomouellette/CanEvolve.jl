@@ -19,7 +19,7 @@ If Julia registry has not updated package, please install to a local directory a
 git clone https://github.com/tomouellette/CanEvolve
 ```
 
-then in a Julia REPL initialized within installiation directory
+then in a Julia REPL initialized within installation directory
 
 ```julia
 using Pkg
