@@ -36,6 +36,8 @@ We provide a fast synthetic data generator that randomly samples empirically rea
 This call to *autoSimulation* simulates tumours at a birth rate = 1 and death rate = 0.1, and ensures the tumour subject to positive selection has at least 1 or 2 subclones between 10 - 40% VAF (20 - 80% cellular fraction). Note that additional subclones up to *ndrivers*-1 can be at frequencies above or below the cutoffs.
 
 ```julia
+Pkg.activate(".") # Running from source directory
+using CanEvolve
 p, n = autoSimulation(1, 0.1, nsubclone_min = 1, nsubclone_max = 2, ndrivers = 3, lower_cutoff = 0.1, upper_cutoff = 0.4)
 ```
 
