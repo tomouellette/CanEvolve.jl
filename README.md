@@ -8,22 +8,18 @@ This julia package is used to generate realistic variant allele frequency (VAF) 
 
 ## Installation
 
-```julia
-using Pkg
-Pkg.add("CanEvolve")
-```
-
-If Julia registry has not updated package, please install to a local directory as follows.
+First download the repository locally
 
 ```bash
 git clone https://github.com/tomouellette/CanEvolve
 ```
 
-then in a Julia REPL initialized within installation directory
+then to run, open a Julia REPL or build a script with the following
 
 ```julia
 using Pkg
-Pkg.activate(".")
+Pkg.activate("[your/path/to/CanEvolve.jl]")
+using CanEvolve
 ```
 
 
@@ -38,7 +34,7 @@ This call to *autoSimulation* simulates tumours at a birth rate = 1 and death ra
 ```julia
 Pkg.activate(".") # Running from source directory
 using CanEvolve
-p, n = autoSimulation(1, 0.1, nsubclone_min = 1, nsubclone_max = 2, ndrivers = 3, lower_cutoff = 0.1, upper_cutoff = 0.4)
+p, n = autoSimulation(1, 0.1, nsubclone_min = 1, nsubclone_max = 2, lower_cutoff = 0.1, upper_cutoff = 0.4)
 ```
 
 To visualize the VAF distribution for the positively selected (*p*) and neutrally evolving (*n*) tumours, run *plotVAF*. 
